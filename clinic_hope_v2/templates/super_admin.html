@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Administration RH</h1>
+    <p class="page-subtitle">Gestion du personnel administrateur</p>
+  </div>
+  <span class="badge bg-danger" style="font-size:.75rem;padding:.4em .9em;">Zone Super Admin</span>
+</div>
+
+<div class="row g-4">
+
+  <!-- FORMULAIRE EMBAUCHE -->
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header bg-dark">👤 Embaucher un Admin</div>
+      <div class="card-body">
+        <form method="POST">
+          <div class="row g-2 mb-2">
+            <div class="col">
+              <label class="form-label">Nom</label>
+              <input type="text" name="nom" class="form-control" required>
+            </div>
+            <div class="col">
+              <label class="form-label">Prénom</label>
+              <input type="text" name="prenom" class="form-control" required>
+            </div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Email professionnel</label>
+            <input type="email" name="email" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Téléphone</label>
+            <input type="text" name="telephone" class="form-control" placeholder="+212 6…" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Adresse bureau</label>
+            <input type="text" name="adresse" class="form-control" required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Mot de passe temporaire</label>
+            <input type="password" name="password" class="form-control" required>
+            <div class="form-text">Respectez les règles de sécurité.</div>
+          </div>
+          <button type="submit" class="btn btn-hope-primary w-100">Créer le compte Admin →</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTE ADMINS -->
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-white">
+        <span class="fw-bold" style="color:var(--navy);">📋 Liste du Personnel Administrateur</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-striped align-middle mb-0">
+          <thead>
+            <tr>
+              <th class="ps-4">Nom complet</th>
+              <th>Email</th>
+              <th>Téléphone</th>
+              <th class="pe-4">Adresse</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for admin in admins %}
+            <tr>
+              <td class="ps-4">
+                <div class="fw-bold" style="color:var(--navy);">{{ admin.nom }} {{ admin.prenom }}</div>
+                <span class="badge bg-dark">Admin</span>
+              </td>
+              <td><a href="mailto:{{ admin.email }}" style="color:var(--teal);text-decoration:none;">{{ admin.email }}</a></td>
+              <td class="text-muted small">{{ admin.telephone }}</td>
+              <td class="text-muted small pe-4">{{ admin.adresse }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" class="text-center py-5 text-muted">
+                <div style="font-size:2rem;margin-bottom:.5rem;">👥</div>
+                <div>Aucun administrateur trouvé.</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

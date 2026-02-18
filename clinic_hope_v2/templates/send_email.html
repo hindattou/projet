@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Envoyer un message</h1>
+    <p class="page-subtitle">{{ patient.nom }} {{ patient.prenom }}</p>
+  </div>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← Retour</a>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-hope-primary">
+        📧 Composition du message
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label">Destinataire</label>
+            <input type="text" class="form-control" value="{{ patient.email }}" disabled>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Sujet</label>
+            <select name="subject" class="form-select">
+              <option value="Rappel de Rendez-vous - Clinic Hope">📅 Rappel de Rendez-vous</option>
+              <option value="Résultats d'analyses - Clinic Hope">🔬 Résultats d'analyses disponibles</option>
+              <option value="Information importante - Clinic Hope">ℹ️ Information importante</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Message</label>
+            <textarea name="message" class="form-control" rows="7" required>Bonjour {{ patient.prenom }},
+
+Ceci est un message de la Clinic Hope concernant votre dossier.
+
+Cordialement,
+L'équipe médicale.</textarea>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-hope-primary px-5">✈️ Envoyer l'email</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

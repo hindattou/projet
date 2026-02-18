@@ -48,7 +48,7 @@ class CarnetAdresses:
         valeur = valeur.lower()
         for contact in self.contacts.values():
             if contact.nom.lower() == valeur or contact.prénom.lower() == valeur:
-             return contact.afficher()
+                return contact.afficher()
         return "Contact introuvable."
 
 

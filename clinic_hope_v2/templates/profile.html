@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Mon Profil</h1>
+    <p class="page-subtitle">Gérez vos informations personnelles et sécurité</p>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-secondary">🖊️ Modifier mon Profil</div>
+      <div class="card-body">
+        <form method="POST">
+
+          <h5 style="font-family:var(--font-serif);color:var(--navy);margin-bottom:1rem;">Coordonnées</h5>
+          <div class="row g-3 mb-3">
+            <div class="col">
+              <label class="form-label">Nom <span class="text-muted">(non modifiable)</span></label>
+              <input type="text" class="form-control" value="{{ user.nom }}" disabled>
+            </div>
+            <div class="col">
+              <label class="form-label">Prénom <span class="text-muted">(non modifiable)</span></label>
+              <input type="text" class="form-control" value="{{ user.prenom }}" disabled>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email <span class="text-muted">(identifiant)</span></label>
+            <input type="text" class="form-control" value="{{ user.email }}" disabled>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col">
+              <label class="form-label">Numéro de téléphone</label>
+              <input type="text" name="telephone" class="form-control" value="{{ user.telephone }}" required>
+            </div>
+            <div class="col">
+              <label class="form-label">Adresse postale</label>
+              <input type="text" name="adresse" class="form-control" value="{{ user.adresse }}" required>
+            </div>
+          </div>
+
+          <hr>
+
+          <h5 style="font-family:var(--font-serif);color:var(--navy);margin-bottom:1rem;">Sécurité</h5>
+          <div class="mb-4">
+            <label class="form-label">Nouveau mot de passe <span class="text-muted">(laisser vide si inchangé)</span></label>
+            <input type="password" name="password" class="form-control" placeholder="••••••••">
+            <div class="form-text">8 caractères min · Maj · Min · Chiffre · Symbole (@$!%*?&)</div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <a href="/" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-success">Enregistrer les modifications ✓</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

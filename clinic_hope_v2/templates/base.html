@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clinic Hope</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <span class="brand-icon">🏥</span>
+      Clinic <span style="color:var(--teal)">Hope</span>
+    </a>
+    <div class="nav-actions">
+      {% if session.user_id %}
+        <span class="navbar-text me-2">
+          {% if session.role == 'admin' %}⚙️{% elif session.role == 'superadmin' %}🔑{% else %}👤{% endif %}
+          <strong style="color:rgba(255,255,255,.85);">{{ session.nom }}</strong>
+        </span>
+        {% if session.role == 'admin' %}
+          <a href="{{ url_for('admin_rdv') }}" class="btn btn-sm me-2" style="background:rgba(0,201,167,.15);color:var(--teal);border:1px solid rgba(0,201,167,.3);border-radius:10px;font-size:.8rem;padding:.35rem .85rem;">🗓️ RDV</a>
+        {% endif %}
+        <a href="{{ url_for('edit_profile') }}" class="btn btn-sm btn-hope-accent me-2">Mon Profil</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-light">Déconnexion</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} mt-3">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

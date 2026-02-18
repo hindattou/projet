@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-circle">🔓</div>
+      <h1>Activation</h1>
+      <p>Créez votre accès espace patient</p>
+    </div>
+    <div class="card">
+      <div class="card-header bg-hope-accent text-center" style="font-size:1rem;">
+        Activation de votre Espace Patient
+      </div>
+      <div class="card-body">
+        <p class="text-muted small text-center mb-4">
+          Saisissez l'email fourni lors de votre admission à la clinique.
+        </p>
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label">Votre Email</label>
+            <input type="email" name="email" class="form-control" placeholder="jean.dupont@email.com" required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Créez votre mot de passe</label>
+            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+            <div class="form-text" style="color:var(--danger);">
+              ⚠ 8 caractères min · 1 Majuscule · 1 Minuscule · 1 Chiffre · 1 Symbole (@$!%*?&)
+            </div>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-hope-primary btn-lg">Activer mon compte →</button>
+            <a href="{{ url_for('login_patient') }}" class="btn btn-secondary">Annuler</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

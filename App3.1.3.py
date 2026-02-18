@@ -53,13 +53,13 @@ class CarnetAdresses:
     def rechercher(self, txt):
         txt = txt.lower()
         res = [c.afficher() for c in self.contacts.values()
-               if txt in c.nom.lower() or txt in c.prenom.lower()]
+            if txt in c.nom.lower() or txt in c.prenom.lower()]
         return "\n".join(res) if res else "❌ Aucun résultat"
 
     def supprimer(self, txt):
         txt = txt.lower()
         matches = [k for k, c in self.contacts.items()
-                   if txt in c.nom.lower() or txt in c.prenom.lower()]
+                if txt in c.nom.lower() or txt in c.prenom.lower()]
         if len(matches) == 1:
             del self.contacts[matches[0]]
             self.sauvegarder()
@@ -165,8 +165,8 @@ class App(tk.Tk):
                 messagebox.showerror("Erreur", err)
 
         self.popup("➕ Ajouter un contact",
-                   ["Nom", "Prénom", "Email", "Téléphone"],
-                   action)
+                ["Nom", "Prénom", "Email", "Téléphone"],
+                action)
 
     def rechercher(self):
         def action(e):

@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Mes Rendez-vous</h1>
+    <p class="page-subtitle">Gérez votre planning de consultations</p>
+  </div>
+  <a href="{{ url_for('patient_home') }}" class="btn btn-secondary">← Mon espace</a>
+</div>
+
+<!-- RDV EXISTANT -->
+{% if rdv_existant %}
+<div style="background:linear-gradient(135deg,var(--navy),var(--navy-mid));border-radius:20px;padding:1.75rem 2rem;margin-bottom:2rem;position:relative;overflow:hidden;">
+  <div style="position:absolute;top:-50px;right:-50px;width:160px;height:160px;background:radial-gradient(circle,rgba(0,201,167,.18),transparent);border-radius:50%;pointer-events:none;"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem;position:relative;">
+    <div style="display:flex;align-items:center;gap:1.25rem;">
+      <div style="width:64px;height:64px;background:rgba(0,201,167,.15);border:1.5px solid rgba(0,201,167,.3);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;">📅</div>
+      <div>
+        <div style="background:rgba(0,201,167,.2);color:var(--teal);border-radius:20px;padding:.18rem .8rem;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;display:inline-block;margin-bottom:.4rem;">✅ Rendez-vous confirmé</div>
+        <div style="font-family:var(--font-serif);font-size:2.4rem;color:var(--teal);line-height:1;">{{ rdv_existant.heure_rdv }}</div>
+        <div style="color:rgba(255,255,255,.65);font-size:.95rem;margin-top:.2rem;">{{ rdv_existant.date_rdv }}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.65rem;flex-wrap:wrap;">
+      <button onclick="scrollToCalendar()" class="btn btn-sm" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:.5rem 1.2rem;border-radius:10px;font-weight:500;cursor:pointer;">✏️ Modifier</button>
+      <form method="POST" onsubmit="return confirm('Confirmer l\'annulation ?')">
+        <input type="hidden" name="action" value="cancel_rdv">
+        <button type="submit" class="btn btn-sm" style="background:rgba(224,92,92,.18);color:#ff8a8a;border:1px solid rgba(224,92,92,.3);padding:.5rem 1.2rem;border-radius:10px;font-weight:500;">🗑 Annuler</button>
+      </form>
+    </div>
+  </div>
+  <p style="color:rgba(255,255,255,.35);font-size:.78rem;margin-top:1rem;margin-bottom:0;position:relative;">⏰ Présentez-vous <strong style="color:rgba(255,255,255,.55);">10 minutes</strong> à l'avance au bureau d'accueil.</p>
+</div>
+{% endif %}
+
+<!-- CALENDRIER + CRÉNEAUX dans le même bloc -->
+<div class="card" id="calendar-block">
+  <div class="card-header bg-hope-primary">
+    {% if rdv_existant %}🔄 Modifier mon rendez-vous{% else %}➕ Prendre un rendez-vous{% endif %}
+  </div>
+  <div class="card-body">
+
+    <!-- Sélecteur de date -->
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1.25rem;">
+      <div style="width:30px;height:30px;background:var(--teal);color:var(--navy);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;">1</div>
+      <span style="font-weight:600;color:var(--navy);">Sélectionnez une date</span>
+    </div>
+
+    <div style="max-width:360px;margin-bottom:1.5rem;">
+      <input type="date" id="date-picker" class="form-control"
+             value="{{ date_today }}"
+             min="{{ date_today }}"
+             oninput="loadCreneaux(this.value)"
+             style="font-size:1rem;padding:.7rem 1rem;">
+    </div>
+
+    <!-- SÉPARATEUR -->
+    <div id="creneaux-section" style="display:none;">
+      <hr style="margin-bottom:1.5rem;">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;">
+        <div style="width:30px;height:30px;background:var(--teal);color:var(--navy);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;">2</div>
+        <span style="font-weight:600;color:var(--navy);">
+          Créneaux disponibles — <span id="date-label" style="color:var(--teal);"></span>
+        </span>
+      </div>
+
+      <!-- Légende -->
+      <div style="display:flex;gap:1.5rem;margin-bottom:1.1rem;font-size:.78rem;color:var(--muted);">
+        <div style="display:flex;align-items:center;gap:.4rem;">
+          <div style="width:12px;height:12px;border-radius:3px;border:1.5px solid var(--teal);background:rgba(0,201,167,.08);"></div> Disponible
+        </div>
+        <div style="display:flex;align-items:center;gap:.4rem;">
+          <div style="width:12px;height:12px;border-radius:3px;background:rgba(224,92,92,.15);border:1.5px solid rgba(224,92,92,.4);"></div> Pris
+        </div>
+        <div id="legend-mon" style="display:none;align-items:center;gap:.4rem;">
+          <div style="width:12px;height:12px;border-radius:3px;background:rgba(0,201,167,.25);border:1.5px solid var(--teal);"></div> Mon RDV actuel
+        </div>
+      </div>
+
+      <!-- Grille des créneaux (remplie via JS) -->
+      <div id="creneaux-grid" style="display:flex;flex-wrap:wrap;gap:.6rem;min-height:56px;"></div>
+
+      <!-- Spinner chargement -->
+      <div id="loading-spinner" style="display:none;padding:1rem 0;color:var(--muted);font-size:.88rem;">
+        ⏳ Chargement des créneaux…
+      </div>
+    </div>
+
+    <!-- FORMULAIRE caché pour confirmer la réservation -->
+    <form method="POST" id="book-form" style="display:none;">
+      <input type="hidden" name="action" value="book_slot">
+      <input type="hidden" name="date_hidden" id="f-date" value="">
+      <input type="hidden" name="heure_hidden" id="f-heure" value="">
+    </form>
+
+  </div>
+</div>
+
+<!-- MODALE DE CONFIRMATION -->
+<div id="confirm-modal" style="display:none;position:fixed;inset:0;background:rgba(13,27,42,.7);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:#fff;border-radius:20px;padding:2.5rem;max-width:400px;width:90%;text-align:center;box-shadow:0 32px 80px rgba(13,27,42,.3);animation:fadeUp .3s ease;">
+    <div style="font-size:3rem;margin-bottom:1rem;">📅</div>
+    <h3 style="font-family:var(--font-serif);font-size:1.5rem;color:var(--navy);margin-bottom:.5rem;">Confirmer le rendez-vous ?</h3>
+    <div id="modal-details" style="background:var(--off-white);border-radius:12px;padding:1rem;margin:1rem 0;font-size:.95rem;color:var(--navy);font-weight:600;"></div>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem;">Vous pouvez modifier ou annuler à tout moment.</p>
+    <div style="display:flex;gap:.75rem;justify-content:center;">
+      <button onclick="closeModal()" style="padding:.65rem 1.75rem;border-radius:10px;border:1.5px solid var(--border);background:#fff;color:var(--navy);font-family:var(--font-sans);font-weight:500;cursor:pointer;font-size:.92rem;">Annuler</button>
+      <button onclick="confirmBooking()" style="padding:.65rem 1.75rem;border-radius:10px;background:linear-gradient(135deg,var(--teal),var(--teal-dim));border:none;color:var(--navy);font-family:var(--font-sans);font-weight:700;cursor:pointer;font-size:.92rem;box-shadow:0 4px 14px rgba(0,201,167,.3);">✅ Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedDate = '';
+let selectedHeure = '';
+
+// Charger la page directement avec la date du jour
+document.addEventListener('DOMContentLoaded', () => {
+  const picker = document.getElementById('date-picker');
+  if (picker.value) loadCreneaux(picker.value);
+});
+
+function loadCreneaux(date) {
+  if (!date) return;
+  selectedDate = date;
+
+  // Afficher la section et le spinner
+  document.getElementById('creneaux-section').style.display = 'block';
+  document.getElementById('creneaux-grid').innerHTML = '';
+  document.getElementById('loading-spinner').style.display = 'block';
+
+  // Formater la date pour l'affichage
+  const d = new Date(date + 'T00:00:00');
+  document.getElementById('date-label').textContent = d.toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  fetch(`/api/creneaux?date=${date}`)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('loading-spinner').style.display = 'none';
+      renderCreneaux(data);
+    })
+    .catch(() => {
+      document.getElementById('loading-spinner').style.display = 'none';
+      document.getElementById('creneaux-grid').innerHTML = '<span style="color:var(--muted);font-size:.85rem;">Erreur de chargement. Réessayez.</span>';
+    });
+}
+
+function renderCreneaux(creneaux) {
+  const grid = document.getElementById('creneaux-grid');
+  const legendMon = document.getElementById('legend-mon');
+  let hasMon = false;
+  grid.innerHTML = '';
+
+  creneaux.forEach(c => {
+    if (c.etat === 'libre') {
+      // CRÉNEAU LIBRE — vert teal
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = c.heure;
+      btn.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:82px;height:50px;border-radius:11px;font-size:.88rem;font-weight:600;border:1.5px solid var(--teal);color:var(--teal);background:rgba(0,201,167,.06);cursor:pointer;transition:all .2s;font-family:var(--font-sans);';
+      btn.onmouseover = () => { btn.style.background='var(--teal)'; btn.style.color='var(--navy)'; btn.style.transform='scale(1.06)'; };
+      btn.onmouseout = () => { btn.style.background='rgba(0,201,167,.06)'; btn.style.color='var(--teal)'; btn.style.transform='scale(1)'; };
+      btn.onclick = () => openModal(c.heure);
+      grid.appendChild(btn);
+
+    } else if (c.etat === 'mon_rdv') {
+      // MON RDV ACTUEL — teal plein avec étoile
+      hasMon = true;
+      const div = document.createElement('div');
+      div.style.cssText = 'display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:82px;height:50px;border-radius:11px;font-size:.82rem;font-weight:700;background:rgba(0,201,167,.2);border:1.5px solid var(--teal);color:var(--teal);';
+      div.innerHTML = `${c.heure}<br><span style="font-size:.58rem;opacity:.8;">★ Mon RDV</span>`;
+      grid.appendChild(div);
+
+    } else {
+      // CRÉNEAU PRIS — rouge barré
+      const div = document.createElement('div');
+      div.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:82px;height:50px;border-radius:11px;font-size:.85rem;font-weight:600;background:rgba(224,92,92,.1);border:1.5px solid rgba(224,92,92,.3);color:#e05c5c;text-decoration:line-through;cursor:not-allowed;opacity:.75;';
+      div.textContent = c.heure;
+      grid.appendChild(div);
+    }
+  });
+
+  legendMon.style.display = hasMon ? 'flex' : 'none';
+}
+
+function openModal(heure) {
+  selectedHeure = heure;
+  const d = new Date(selectedDate + 'T00:00:00');
+  const dateStr = d.toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('modal-details').innerHTML = `🗓️ ${dateStr}<br>🕐 ${heure}`;
+  document.getElementById('confirm-modal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('confirm-modal').style.display = 'none';
+}
+
+function confirmBooking() {
+  document.getElementById('f-date').value = selectedDate;
+  document.getElementById('f-heure').value = selectedHeure;
+  document.getElementById('book-form').submit();
+}
+
+function scrollToCalendar() {
+  document.getElementById('calendar-block').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// Fermer modale en cliquant dehors
+document.getElementById('confirm-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+
+{% endblock %}

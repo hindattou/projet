@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Gestion des Rendez-vous</h1>
+    <p class="page-subtitle">Visualisez, modifiez et annulez les consultations</p>
+  </div>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← Dashboard</a>
+</div>
+
+<div class="row g-4">
+
+  <!-- COLONNE GAUCHE : Calendrier du jour -->
+  <div class="col-md-4">
+    <div class="card" style="position:sticky;top:80px;">
+      <div class="card-header bg-hope-primary">🗓️ Calendrier du jour</div>
+      <div class="card-body">
+        <!-- Sélecteur de date -->
+        <form method="GET" class="mb-3">
+          <label class="form-label">Choisir une date</label>
+          <div style="display:flex;gap:.5rem;">
+            <input type="date" name="date" class="form-control" value="{{ date_choisie }}" min="{{ date_today }}">
+            <button type="submit" class="btn btn-hope-primary px-3">→</button>
+          </div>
+        </form>
+
+        <!-- Créneaux visuels -->
+        <div style="margin-top:1.25rem;">
+          <div style="font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;">
+            Créneaux — <span style="color:var(--teal);">{{ date_choisie }}</span>
+          </div>
+
+          <!-- Légende -->
+          <div style="display:flex;gap:1rem;font-size:.75rem;margin-bottom:.75rem;">
+            <div style="display:flex;align-items:center;gap:.3rem;">
+              <div style="width:10px;height:10px;border-radius:3px;background:var(--teal);"></div> Libre
+            </div>
+            <div style="display:flex;align-items:center;gap:.3rem;">
+              <div style="width:10px;height:10px;border-radius:3px;background:#e05c5c;"></div> Pris
+            </div>
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;gap:.4rem;">
+            {% for c in creneaux %}
+              {% if c.etat == 'libre' %}
+                <div style="display:inline-flex;align-items:center;justify-content:center;padding:.3rem .65rem;border-radius:8px;font-size:.78rem;font-weight:600;border:1.5px solid var(--teal);color:var(--teal);background:rgba(0,201,167,.07);">
+                  {{ c.heure }}
+                </div>
+              {% else %}
+                <div style="display:inline-flex;align-items:center;justify-content:center;padding:.3rem .65rem;border-radius:8px;font-size:.78rem;font-weight:600;border:1.5px solid rgba(224,92,92,.4);color:#e05c5c;background:rgba(224,92,92,.1);text-decoration:line-through;">
+                  {{ c.heure }}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- RDV du jour -->
+        {% if rdvs_du_jour %}
+        <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem;">
+          <div style="font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;">
+            RDV prévus ({{ rdvs_du_jour|length }})
+          </div>
+          {% for r in rdvs_du_jour %}
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem .75rem;background:rgba(224,92,92,.08);border:1px solid rgba(224,92,92,.2);border-radius:10px;margin-bottom:.4rem;">
+            <div>
+              <div style="font-weight:700;font-size:.82rem;color:#e05c5c;">🕐 {{ r.heure_rdv }}</div>
+              <div style="font-size:.75rem;color:var(--muted);">{{ r.nom }} {{ r.prenom }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+  <!-- COLONNE DROITE : Tous les RDV à venir -->
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-white" style="background:var(--off-white)!important;">
+        <span style="font-weight:600;color:var(--navy);">📋 Tous les rendez-vous à venir</span>
+        <span class="badge bg-dark ms-2">{{ tous_rdvs|length }} total</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th class="ps-4">Patient</th>
+              <th>Date & Heure</th>
+              <th class="text-end pe-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in tous_rdvs %}
+            <tr id="row-{{ r.id }}">
+              <td class="ps-4">
+                <div style="font-weight:600;color:var(--navy);">{{ r.nom }} {{ r.prenom }}</div>
+                <div class="small text-muted">{{ r.email_patient }}</div>
+              </td>
+              <td>
+                <div style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(224,92,92,.1);color:#e05c5c;border:1px solid rgba(224,92,92,.25);border-radius:10px;padding:.35rem .85rem;font-weight:700;font-size:.88rem;">
+                  📅 {{ r.date_rdv }} &nbsp;·&nbsp; 🕐 {{ r.heure_rdv }}
+                </div>
+              </td>
+              <td class="text-end pe-4">
+                <div style="display:flex;gap:.5rem;justify-content:flex-end;align-items:center;">
+
+                  <!-- MODIFIER : toggle inline form -->
+                  <button type="button" class="btn btn-sm btn-outline-secondary"
+                          onclick="toggleModify({{ r.id }})" title="Modifier">✏️ Modifier</button>
+
+                  <!-- ANNULER -->
+                  <form method="POST" onsubmit="return confirm('Annuler ce rendez-vous ?')">
+                    <input type="hidden" name="action" value="cancel_rdv">
+                    <input type="hidden" name="rdv_id" value="{{ r.id }}">
+                    <button type="submit" class="btn btn-sm" style="background:rgba(224,92,92,.1);color:#e05c5c;border:1.5px solid rgba(224,92,92,.3);border-radius:8px;padding:.3rem .75rem;font-size:.8rem;font-weight:500;">
+                      🗑 Annuler
+                    </button>
+                  </form>
+                </div>
+
+                <!-- FORMULAIRE MODIFICATION INLINE (caché par défaut) -->
+                <div id="modify-{{ r.id }}" style="display:none;margin-top:.75rem;background:var(--off-white);border:1px solid var(--border);border-radius:12px;padding:1rem;">
+                  <form method="POST">
+                    <input type="hidden" name="action" value="modify_rdv">
+                    <input type="hidden" name="rdv_id" value="{{ r.id }}">
+                    <div style="display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap;">
+                      <div>
+                        <label class="form-label" style="font-size:.75rem;">Nouvelle date</label>
+                        <input type="date" name="new_date" class="form-control form-control-sm" value="{{ r.date_rdv }}" required>
+                      </div>
+                      <div>
+                        <label class="form-label" style="font-size:.75rem;">Nouvel horaire</label>
+                        <select name="new_heure" class="form-select form-select-sm" required>
+                          {% for h in horaires_base %}
+                          <option value="{{ h }}" {% if h == r.heure_rdv %}selected{% endif %}>{{ h }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                      <button type="submit" class="btn btn-sm btn-hope-primary">Enregistrer</button>
+                      <button type="button" class="btn btn-sm btn-secondary" onclick="toggleModify({{ r.id }})">Annuler</button>
+                    </div>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="3" class="text-center py-5 text-muted">
+                <div style="font-size:2rem;margin-bottom:.5rem;">🗓️</div>
+                Aucun rendez-vous à venir.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggleModify(id) {
+  const el = document.getElementById('modify-' + id);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+
+{% endblock %}

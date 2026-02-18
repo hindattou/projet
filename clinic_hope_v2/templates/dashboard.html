@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Gestion Clinique</h1>
+    <p class="page-subtitle">Répertoire des contacts & rendez-vous</p>
+  </div>
+  <div style="display:flex;gap:.6rem;align-items:center;"><a href="{{ url_for('admin_rdv') }}" class="btn btn-hope-primary btn-sm">🗓️ Gérer les RDV</a><span class="badge bg-dark" style="font-size:.75rem;padding:.4em .9em;">Admin</span></div>
+</div>
+
+<div class="row g-4">
+  <!-- FORMULAIRE AJOUT -->
+  <div class="col-md-4">
+    <div class="card" style="position:sticky;top:80px;">
+      <div class="card-header bg-hope-primary">
+        <span style="font-size:1.1rem;">＋</span> Nouveau Dossier
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <input type="hidden" name="add_contact" value="1">
+
+          <div class="mb-3">
+            <label class="form-label">Type de contact</label>
+            <select name="categorie" class="form-select" required>
+              <option value="Patient" selected>👤 Patient</option>
+              <option value="Fournisseur">📦 Fournisseur</option>
+              <option value="Entreprise">🏢 Entreprise / Partenaire</option>
+              <option value="Client">💼 Client</option>
+            </select>
+          </div>
+
+          <div class="row g-2 mb-2">
+            <div class="col">
+              <input type="text" name="nom" class="form-control" placeholder="Nom" required>
+            </div>
+            <div class="col">
+              <input type="text" name="prenom" class="form-control" placeholder="Prénom" required>
+            </div>
+          </div>
+
+          <input type="text" name="fonction" class="form-control mb-2" placeholder="Fonction (ex: Comptable…)">
+          <input type="email" name="email" class="form-control mb-2" placeholder="Email" required>
+          <input type="text" name="telephone" class="form-control mb-2" placeholder="Téléphone (+212…)" required>
+          <textarea name="adresse" class="form-control mb-3" rows="2" placeholder="Adresse complète"></textarea>
+
+          <button type="submit" class="btn btn-hope-primary w-100">Enregistrer la fiche →</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLEAU CONTACTS -->
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-white" style="background:var(--off-white)!important;">
+        <div class="d-flex justify-content-between align-items-center">
+          <span style="font-weight:600;color:var(--navy);">📂 Répertoire & Rendez-vous</span>
+          <form class="d-flex gap-2" action="{{ url_for('dashboard') }}" method="GET" style="max-width:280px;">
+            <div style="position:relative;flex:1;">
+              <span style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;">🔍</span>
+              <input class="form-control form-control-sm" style="padding-left:2.2rem!important;" type="search" name="search" placeholder="Rechercher un contact…">
+            </div>
+            <button class="btn btn-sm btn-hope-primary" type="submit">Chercher</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th class="ps-4">Identité</th>
+              <th>Contact</th>
+              <th>Prochain RDV</th>
+              <th class="text-end pe-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in patients %}
+            <tr>
+              <td class="ps-4">
+                <div class="fw-bold" style="color:var(--navy);">{{ p.nom }} {{ p.prenom }}</div>
+                {% set cat = p.categorie | lower %}
+                <span class="badge badge-{{ cat }}">{{ p.categorie }}</span>
+                {% if p.fonction %}
+                  <div class="small fst-italic text-muted mt-1">{{ p.fonction }}</div>
+                {% endif %}
+              </td>
+
+              <td>
+                <div class="small">
+                  <a href="mailto:{{ p.email }}" style="color:var(--navy);text-decoration:none;">
+                    📧 {{ p.email }}
+                  </a>
+                </div>
+                <div class="small text-muted">📱 {{ p.telephone }}</div>
+              </td>
+
+              <td>
+                {% if p.rdv and p.rdv != "" %}
+                  <div style="display:inline-flex;align-items:center;gap:.4rem;background:rgba(224,92,92,.1);color:var(--danger);border-radius:8px;padding:.3rem .7rem;font-size:.82rem;font-weight:600;">
+                    📅 {{ p.rdv }}
+                  </div>
+                {% else %}
+                  <span class="text-muted small">— Aucun —</span>
+                {% endif %}
+              </td>
+
+              <td class="text-end pe-4">
+                <div class="btn-group">
+                  <a href="{{ url_for('edit_contact', id=p.id) }}" class="btn btn-sm btn-outline-secondary" title="Modifier fiche">✏️</a>
+                  <a href="{{ url_for('send_email_route', email_patient=p.email) }}" class="btn btn-sm btn-outline-primary" title="Envoyer email">✉️</a>
+                  <a href="https://wa.me/{{ clean_phone(p.telephone) }}" class="btn btn-sm btn-success" target="_blank" title="WhatsApp">📱</a>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" class="text-center py-5 text-muted">
+                <div style="font-size:2rem;margin-bottom:.5rem;">📋</div>
+                <div>Aucune fiche trouvée. Commencez par en ajouter une.</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

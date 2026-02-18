@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-circle">🏥</div>
+      <h1>Clinic Hope</h1>
+      <p>Accédez à votre espace sécurisé</p>
+    </div>
+    <div class="card">
+      <div class="card-header card-header-hope text-center" style="font-size:1rem;letter-spacing:.03em;">
+        Connexion
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label">Adresse email</label>
+            <input type="email" name="email" class="form-control" placeholder="votre@email.com" required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Mot de passe</label>
+            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-hope-primary w-100 btn-lg">Se connecter →</button>
+        </form>
+        <hr>
+        <div class="text-center">
+          <p class="text-muted small mb-2">Première connexion ?</p>
+          <a href="{{ url_for('register') }}" class="btn btn-sm btn-outline-secondary">Activer mon compte patient</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

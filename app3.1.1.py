@@ -67,7 +67,7 @@ class CarnetAdresses:
                 del self.contacts[key]
                 self.sauvegarder_contacts()
                 return True
-        return False  
+        return False
 
     def charger_contacts(self):
         try:

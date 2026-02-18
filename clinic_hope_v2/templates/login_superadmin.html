@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion Super Admin — Clinic Hope</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--navy:#0d1b2a;--navy-mid:#1a2d42;--teal:#00c9a7;--teal-dim:#00a388;--danger:#e05c5c;--off-white:#f0f4f8;--muted:#8399b3;--border:#d4e0ed;--font-serif:'DM Serif Display',Georgia,serif;--font-sans:'DM Sans',sans-serif;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font-sans);min-height:100vh;display:flex;flex-direction:column;background:#08111a;}
+    .topbar{background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);height:56px;display:flex;align-items:center;padding:0 2rem;justify-content:space-between;}
+    .brand{font-family:var(--font-serif);font-size:1.3rem;color:#fff;text-decoration:none;display:flex;align-items:center;gap:.5rem;}
+    .brand-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--teal),var(--teal-dim));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+    .back-link{font-size:.82rem;color:rgba(255,255,255,.35);text-decoration:none;}
+    .back-link:hover{color:rgba(255,255,255,.7);}
+
+    /* FULL DARK LAYOUT */
+    .page{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 1.5rem;position:relative;overflow:hidden;}
+    .page::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 40%,rgba(0,201,167,.05) 0%,transparent 60%);}
+    .page::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 70%,rgba(224,92,92,.04) 0%,transparent 55%);}
+
+    .card{width:100%;max-width:460px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:24px;padding:3rem;backdrop-filter:blur(12px);position:relative;z-index:1;box-shadow:0 32px 80px rgba(0,0,0,.5);}
+
+    /* Shield icon */
+    .shield{width:80px;height:80px;background:linear-gradient(135deg,rgba(224,92,92,.2),rgba(224,92,92,.08));border:1.5px solid rgba(224,92,92,.3);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 1.75rem;box-shadow:0 12px 32px rgba(224,92,92,.15);}
+
+    .form-title{font-family:var(--font-serif);font-size:2rem;color:#fff;margin-bottom:.3rem;text-align:center;}
+    .form-sub{color:rgba(255,255,255,.35);font-size:.85rem;text-align:center;margin-bottom:.6rem;}
+
+    /* SECURITY WARNING STRIP */
+    .warning-strip{background:rgba(224,92,92,.1);border:1px solid rgba(224,92,92,.2);border-radius:10px;padding:.65rem 1rem;display:flex;align-items:center;gap:.6rem;margin-bottom:1.75rem;font-size:.78rem;color:rgba(224,92,92,.85);font-weight:500;}
+
+    .field{margin-bottom:1.25rem;}
+    .field label{display:block;font-size:.78rem;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:.06em;margin-bottom:.45rem;text-transform:uppercase;}
+    .field input{width:100%;padding:.75rem 1rem;border:1.5px solid rgba(255,255,255,.1);border-radius:12px;font-family:var(--font-sans);font-size:.95rem;color:#fff;background:rgba(255,255,255,.05);outline:none;transition:all .2s;}
+    .field input:focus{border-color:rgba(224,92,92,.5);box-shadow:0 0 0 3px rgba(224,92,92,.1);}
+    .field input::placeholder{color:rgba(255,255,255,.2);font-weight:300;}
+    .btn-submit{width:100%;padding:.9rem;border-radius:12px;background:linear-gradient(135deg,#c94040,#e05c5c);border:none;color:#fff;font-family:var(--font-sans);font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 6px 22px rgba(224,92,92,.3);transition:all .25s;margin-top:.5rem;}
+    .btn-submit:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(224,92,92,.45);}
+    .divider{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;color:rgba(255,255,255,.2);font-size:.78rem;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+    .other-logins{display:flex;gap:.5rem;flex-direction:column;}
+    .btn-other{display:block;width:100%;padding:.6rem 1rem;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.55);font-family:var(--font-sans);font-size:.82rem;font-weight:500;text-align:center;text-decoration:none;transition:all .2s;}
+    .btn-other:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);}
+    .alert{padding:.75rem 1rem;border-radius:10px;font-size:.85rem;font-weight:500;margin-bottom:1.25rem;border-left:3px solid;}
+    .alert-danger{background:rgba(224,92,92,.1);color:#ff9090;border-color:#e05c5c;}
+    .alert-success{background:rgba(46,194,126,.1);color:#5df0a5;border-color:#2ec27e;}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="/" class="brand"><span class="brand-icon">🏥</span>Clinic <span style="color:var(--teal)">Hope</span></a>
+    <a href="/" class="back-link">← Retour à l'accueil</a>
+  </div>
+
+  <div class="page">
+    <div class="card">
+      <div class="shield">🔑</div>
+      <h2 class="form-title">Super Administration</h2>
+      <p class="form-sub">Accès restreint — Zone sécurisée</p>
+
+      <div class="warning-strip">
+        ⚠️ Cet accès est réservé à la direction générale. Toute tentative non autorisée est enregistrée.
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+          <div class="alert alert-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST">
+        <div class="field">
+          <label>Identifiant sécurisé</label>
+          <input type="email" name="email" placeholder="superadmin@clinichope.com" required autofocus>
+        </div>
+        <div class="field">
+          <label>Mot de passe</label>
+          <input type="password" name="password" placeholder="••••••••••••" required>
+        </div>
+        <button type="submit" class="btn-submit">🔐 Accéder à la zone admin</button>
+      </form>
+
+      <div class="divider">accès standard</div>
+      <div class="other-logins">
+        <a href="/login/patient" class="btn-other">👤 Connexion Patient</a>
+        <a href="/login/admin" class="btn-other">⚙️ Connexion Administrateur</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
